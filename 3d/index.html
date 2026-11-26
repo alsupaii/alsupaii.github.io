@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>alsupai — Samet Can Oruç</title>
+<style>
+@font-face { font-family: "Gochi Hand"; font-display: block; src: url("../fonts/gochi-hand-latin.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 200 800; font-display: swap; src: url("../fonts/manrope-latin-wght-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 200 800; font-display: swap; src: url("../fonts/manrope-latin-ext-wght-normal.woff2") format("woff2"); unicode-range: U+0100-02FF; }
+:root { --ink: #241b16; --accent: #c27f16; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #6f7352; color: var(--ink); font-family: "Manrope", system-ui, sans-serif; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100svh; touch-action: pan-y; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top { position: fixed; inset: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; pointer-events: none; }
+.top a { pointer-events: auto; color: #f1e6cf; text-decoration: none; } /* zeytin duvar üstünde kemik beyazı */
+.brand { font: 400 32px/1 "Gochi Hand", cursive; }
+.nav { display: flex; gap: 22px; font-weight: 700; font-size: 14px; }
+.hint { position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; padding: 10px 20px; border-radius: 14px; white-space: nowrap;
+  background: rgba(251,247,240,.92); box-shadow: 0 8px 30px rgba(40,25,10,.16); /* bulanıklık yok: her karede yeniden hesaplanıyordu */
+  font-size: 13px; transition: opacity .3s; }
+.hint b { font-weight: 800; font-size: 14px; margin-right: 8px; }
+.card { position: fixed; left: 0; top: 0; width: 320px; padding: 26px 26px 20px; border-radius: 6px; opacity: 0; pointer-events: none; transform: translateX(-10px); transition: opacity .35s, transform .45s cubic-bezier(.2,.8,.2,1);
+  background: rgba(252,249,243,.94); /* bulanıklık yok: her karede yeniden hesaplanıyordu */ border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 16px 44px rgba(40,25,10,.22), inset 0 1px 0 rgba(255,255,255,.7); }
+.card.on { opacity: 1; pointer-events: auto; transform: none; }
+.card small { display: block; font-weight: 800; font-size: 11px; letter-spacing: .06em; color: #6b5a4c; }
+.card h2 { margin: 8px 0 6px; font-weight: 800; font-size: 34px; letter-spacing: -.02em; line-height: 1.05; }
+.card p { margin: 0 0 16px; font-size: 14px; line-height: 1.45; }
+.card dl { margin: 0 0 20px; display: grid; grid-template-columns: 74px 1fr; gap: 6px 10px; font-size: 12.5px; }
+.card dt { text-transform: uppercase; letter-spacing: .06em; font-size: 10.5px; }
+.card dt { font-weight: 800; color: #6b5a4c; } .card dd { margin: 0; }
+.card .geri { display: block; margin-top: 14px; padding: 0; min-height: 0; border: 0; background: none; color: #6b5a4c; font: 800 10.5px "Manrope", sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.card a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--ink); color: #fbf7f0; font-weight: 800; font-size: 13.5px; text-decoration: none; }
+.yuk { position: fixed; inset: 0; display: grid; place-items: center; background: #6f7352; font: 400 52px "Gochi Hand", cursive; color: #f1e6cf; transition: opacity .6s; }
+.yuk.bitti { opacity: 0; pointer-events: none; }
+.detay { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100%); overflow-y: auto; overscroll-behavior: contain; padding: 22px 34px 60px; background: #fbf8f2; box-shadow: -20px 0 60px rgba(30,25,10,.28); transform: translateX(104%); transition: transform .55s cubic-bezier(.2,.8,.2,1); z-index: 5; }
+.detay.on { transform: none; }
+.detay__ust { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; position: sticky; top: -22px; padding: 12px 0; background: #fbf8f2; }
+.detay__ust button { border: 0; background: none; padding: 6px 0; font: 800 12px "Manrope", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #6b5a4c; cursor: pointer; }
+.detay__ust span { display: flex; gap: 16px; }
+.detay small { display: block; font-weight: 800; font-size: 11px; letter-spacing: .06em; color: #6b5a4c; }
+.detay h1 { margin: 10px 0 12px; font-weight: 800; font-size: 44px; letter-spacing: -.03em; line-height: 1.02; }
+.detay__ozet { margin: 0 0 18px; font-size: 16px; line-height: 1.55; }
+.detay__gh { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--ink); color: #fbf7f0; font-weight: 800; font-size: 13.5px; text-decoration: none; }
+.detay__gh[hidden] { display: none; }
+.detay .sayilar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin: 28px 0 8px; background: #e2d9c8; border: 1px solid #e2d9c8; }
+.detay .sayilar div { background: #fbf8f2; padding: 14px 16px; }
+.detay .sayilar b { display: block; font-size: 24px; letter-spacing: -.02em; }
+.detay .sayilar span { font-size: 12.5px; color: #6b5a4c; }
+.detay section { margin-top: 30px; padding-top: 18px; border-top: 1px solid #e2d9c8; }
+.detay h3 { margin: 0 0 12px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #6b5a4c; }
+.detay ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.55; } .detay li + li { margin-top: 8px; }
+.detay dl { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; margin: 0; font-size: 13.5px; } .detay dt { font-weight: 800; } .detay dd { margin: 0; }
+.detay .galeri { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .detay .galeri a { color: inherit; text-decoration: none; }
+.detay figure { margin: 0; } .detay img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: #ece4d4; }
+.detay figcaption { margin-top: 5px; font-size: 12px; color: #6b5a4c; }
+@media (max-width: 760px) {
+  .detay { padding: 16px 18px 48px; } .detay h1 { font-size: 34px; }
+  .top { padding: 14px 16px; } .nav { gap: 14px; font-size: 13px; }
+  .hint { white-space: normal; width: calc(100% - 32px); text-align: center; font-size: 12.5px; } .hint b { display: block; margin: 0; }
+  .card { left: 16px !important; right: 16px; top: auto !important; bottom: 18px; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .card, .hint, .yuk, .detay { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top"><a class="brand" href="./">alsupai</a><nav class="nav"><a href="#telearm">İşler</a><a href="https://github.com/alsupaii" target="_blank" rel="noopener">GitHub</a></nav></header>
+<canvas id="sahne" aria-hidden="true"></canvas>
+<nav class="sr" aria-label="Projeler" data-liste></nav>
+<p class="hint" data-hint><b>Samet Can Oruç</b>Elektronik + yazılım. Duvardaki her devre kartı bir projem, üstüne gel.</p>
+<aside class="card" data-card aria-live="polite"><small data-k></small><h2 data-t></h2><p data-s></p><dl data-d></dl><a data-a href="#">Projeyi aç</a><button class="geri" type="button" data-x>Duvara geri as</button></aside>
+<aside class="detay" data-detay hidden aria-label="Proje ayrıntısı">
+  <div class="detay__ust"><button type="button" class="detay__kapat" data-kapat>← Masaya dön</button><span><button type="button" data-onceki></button><button type="button" data-sonraki></button></span></div>
+  <small data-dk></small><h1 data-dt></h1><p class="detay__ozet" data-dd></p>
+  <a class="detay__gh" data-dl href="#" target="_blank" rel="noopener">GitHub'da kodu aç</a>
+  <div data-govde></div>
+</aside>
+<div class="yuk" data-yuk>alsupai</div>
+<script type="module" src="deneme.js"></script>
+</body>
+</html>
